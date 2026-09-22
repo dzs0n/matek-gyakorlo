@@ -1,0 +1,572 @@
+
+<!doctype html>
+<html lang="hu">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Kiegészítés 20-ig</title>
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            color: #222;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .app {
+            max-width: 760px;
+            margin: 30px auto;
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: end;
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        select, button, input { font-size: 18px; }
+
+        select {
+            display: block;
+            margin-top: 6px;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid #bbb;
+        }
+
+        button {
+            padding: 12px 20px;
+            border: 0;
+            border-radius: 10px;
+            cursor: pointer;
+            background: #222;
+            color: white;
+        }
+
+        button.secondary { background: #666; }
+        button.finish { background: #b51f1f; margin-left: auto; }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 36px 20px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        .question-label { color: #666; margin-bottom: 14px; }
+
+        .equation {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            font-size: 48px;
+            font-weight: bold;
+            flex-wrap: wrap;
+        }
+
+        #answer {
+            width: 100px;
+            height: 70px;
+            font-size: 42px;
+            text-align: center;
+            border-radius: 12px;
+            border: 3px solid #bbb;
+        }
+
+        #answer:focus { outline: none; border-color: #333; }
+
+        #feedback {
+            margin-top: 20px;
+            min-height: 35px;
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .stat {
+            background: white;
+            border-radius: 14px;
+            padding: 16px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .stat-number { font-size: 28px; font-weight: bold; }
+        .stat-label { font-size: 13px; color: #666; }
+
+        .tip {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            margin-top: 18px;
+        }
+
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.55);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 1000;
+        }
+
+        .modal-backdrop.show { display: flex; }
+
+        .modal {
+            width: min(900px, 100%);
+            max-height: 90vh;
+            overflow: auto;
+            background: white;
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 12px 50px rgba(0,0,0,0.25);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .modal h2 { margin: 0; }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin: 18px 0 22px;
+        }
+
+        .summary-box {
+            background: #f1f1f1;
+            border-radius: 12px;
+            padding: 14px;
+            text-align: center;
+        }
+
+        .summary-box strong {
+            display: block;
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 15px;
+        }
+
+        th, td {
+            border-bottom: 1px solid #ddd;
+            padding: 10px 8px;
+            text-align: left;
+        }
+
+        th { background: #f7f7f7; position: sticky; top: 0; }
+        tr.wrong { background: #fff0f0; }
+        tr.correct-row { background: #f3fff3; }
+        .status-ok { color: #087a16; font-weight: bold; }
+        .status-wrong { color: #b00020; font-weight: bold; }
+
+        .empty-state {
+            padding: 30px 10px;
+            text-align: center;
+            color: #666;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        @media print {
+            body { background: white; padding: 0; }
+            .app { display: none !important; }
+            .modal-backdrop { position: static; display: block !important; background: white; padding: 0; }
+            .modal { width: 100%; max-height: none; overflow: visible; box-shadow: none; border-radius: 0; padding: 0; }
+            .modal-header button, .modal-actions { display: none !important; }
+            .modal-header { margin-bottom: 10px; }
+            .summary-grid { grid-template-columns: repeat(4, 1fr); }
+            th { position: static; }
+            tr { break-inside: avoid; }
+        }
+
+        @media (max-width: 650px) {
+            .equation { font-size: 34px; }
+            #answer { width: 80px; height: 60px; font-size: 34px; }
+            .stats, .summary-grid { grid-template-columns: repeat(2, 1fr); }
+            button.finish { margin-left: 0; }
+            table { font-size: 13px; }
+            th, td { padding: 8px 5px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app">
+    <div class="toolbar">
+        <label>
+            Nehézség
+            <select id="level">
+                <option value="10">10-en belül</option>
+                <option value="20easy">20-ig, könnyebb</option>
+                <option value="20" selected>20-ig, minden</option>
+            </select>
+        </label>
+
+        <button id="reset" class="secondary">Újrakezdés</button>
+        <button id="finish" class="finish">Vége / Statisztika</button>
+    </div>
+
+    <div class="card">
+        <div class="question-label">Mennyi hiányzik?</div>
+
+        <div class="equation">
+            <span id="start">7</span>
+            <span>+</span>
+            <input id="answer" type="number" min="0" max="20">
+            <span>=</span>
+            <span id="target">12</span>
+        </div>
+
+        <div style="margin-top: 30px;">
+            <button id="check">Ellenőrzés</button>
+        </div>
+
+        <div id="feedback"></div>
+    </div>
+
+    <div class="stats">
+        <div class="stat">
+            <div class="stat-number" id="correct">0</div>
+            <div class="stat-label">jó válasz</div>
+        </div>
+        <div class="stat">
+            <div class="stat-number" id="total">0</div>
+            <div class="stat-label">feladat</div>
+        </div>
+        <div class="stat">
+            <div class="stat-number" id="streak">0</div>
+            <div class="stat-label">sorozat</div>
+        </div>
+    </div>
+
+    <div class="tip">
+        Tipp: ha már ismeri a számokat, próbálja fejben kitalálni, ne mindig ujjal számolja végig.
+    </div>
+</div>
+
+<div id="statsModal" class="modal-backdrop">
+    <div class="modal">
+        <div class="modal-header">
+            <h2>Gyakorlás eredménye</h2>
+            <button id="closeStats" class="secondary">Bezárás</button>
+        </div>
+
+        <div class="summary-grid">
+            <div class="summary-box"><strong id="sumTotal">0</strong>feladat</div>
+            <div class="summary-box"><strong id="sumCorrect">0</strong>helyes</div>
+            <div class="summary-box"><strong id="sumPercent">0%</strong>eredmény</div>
+            <div class="summary-box"><strong id="sumAvg">–</strong>medián válaszidő</div>
+        </div>
+
+        <div id="resultTableWrap"></div>
+
+        <div class="modal-actions">
+            <button id="printStats" class="secondary">Nyomtatás / PDF</button>
+            <button id="downloadTxt" class="secondary">TXT letöltés</button>
+            <button id="continueBtn" class="secondary">Folytatás</button>
+            <button id="restartFromStats">Új gyakorlás</button>
+        </div>
+    </div>
+</div>
+
+<script>
+let a = 7;
+let b = 12;
+let correct = 0;
+let total = 0;
+let streak = 0;
+let locked = false;
+let history = [];
+let nextQuestionTimer = null;
+
+let questionStartedAt = performance.now();
+
+const startEl = document.getElementById("start");
+const targetEl = document.getElementById("target");
+const answerEl = document.getElementById("answer");
+const feedbackEl = document.getElementById("feedback");
+const correctEl = document.getElementById("correct");
+const totalEl = document.getElementById("total");
+const streakEl = document.getElementById("streak");
+const checkButton = document.getElementById("check");
+const levelEl = document.getElementById("level");
+const statsModal = document.getElementById("statsModal");
+
+function randomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function formatSeconds(seconds) {
+    return seconds.toFixed(1).replace(".", ",") + " mp";
+}
+
+function newQuestion() {
+    if (nextQuestionTimer) { clearTimeout(nextQuestionTimer); nextQuestionTimer = null; }
+    const level = levelEl.value;
+
+    if (level === "10") {
+        a = randomInt(1, 9);
+        b = randomInt(a + 1, 10);
+    } else if (level === "20easy") {
+        if (Math.random() < 0.5) {
+            a = randomInt(1, 9);
+            b = randomInt(a + 1, 10);
+        } else {
+            a = randomInt(10, 19);
+            b = randomInt(a + 1, 20);
+        }
+    } else {
+        a = randomInt(1, 19);
+        b = randomInt(a + 1, 20);
+    }
+
+    startEl.textContent = a;
+    targetEl.textContent = b;
+    answerEl.value = "";
+    feedbackEl.textContent = "";
+    locked = false;
+    checkButton.textContent = "Ellenőrzés";
+    answerEl.disabled = false;
+    questionStartedAt = performance.now();
+    answerEl.focus();
+}
+
+function checkAnswer() {
+    if (locked) {
+        newQuestion();
+        return;
+    }
+
+    const value = answerEl.value.trim();
+    if (value === "") {
+        feedbackEl.textContent = "Írj be egy számot!";
+        feedbackEl.style.color = "#b00020";
+        return;
+    }
+
+    const answer = Number(value);
+    const solution = b - a;
+    const seconds = (performance.now() - questionStartedAt) / 1000;
+    const isCorrect = answer === solution;
+
+    total++;
+
+    if (isCorrect) {
+        correct++;
+        streak++;
+        feedbackEl.textContent = "✓ Ügyes!";
+        feedbackEl.style.color = "green";
+    } else {
+        streak = 0;
+        feedbackEl.textContent = "✗ A helyes válasz: " + solution;
+        feedbackEl.style.color = "red";
+    }
+
+    history.push({
+        number: total,
+        a: a,
+        b: b,
+        answer: answer,
+        solution: solution,
+        correct: isCorrect,
+        seconds: seconds
+    });
+
+    correctEl.textContent = correct;
+    totalEl.textContent = total;
+    streakEl.textContent = streak;
+
+    locked = true;
+    answerEl.disabled = true;
+    checkButton.textContent = "Következő";
+
+    // Rövid ideig látszik a visszajelzés, aztán automatikusan jön a következő.
+    nextQuestionTimer = setTimeout(function() {
+        nextQuestionTimer = null;
+        newQuestion();
+    }, 1000);
+}
+
+function renderStats() {
+    document.getElementById("sumTotal").textContent = total;
+    document.getElementById("sumCorrect").textContent = correct;
+    document.getElementById("sumPercent").textContent = total ? Math.round(correct / total * 100) + "%" : "0%";
+
+    if (history.length) {
+        const times = history.map(item => item.seconds).sort((x, y) => x - y);
+        const middle = Math.floor(times.length / 2);
+        const median = times.length % 2
+            ? times[middle]
+            : (times[middle - 1] + times[middle]) / 2;
+        document.getElementById("sumAvg").textContent = formatSeconds(median);
+    } else {
+        document.getElementById("sumAvg").textContent = "–";
+    }
+
+    const wrap = document.getElementById("resultTableWrap");
+
+    if (history.length === 0) {
+        wrap.innerHTML = '<div class="empty-state">Még nincs megoldott feladat.</div>';
+        return;
+    }
+
+    let html = `
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Feladat</th>
+                    <th>Válasz</th>
+                    <th>Helyes</th>
+                    <th>Idő</th>
+                    <th>Eredmény</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+    for (const item of history) {
+        html += `
+            <tr class="${item.correct ? 'correct-row' : 'wrong'}">
+                <td>${item.number}.</td>
+                <td><strong>${item.a} + ? = ${item.b}</strong></td>
+                <td>${item.answer}</td>
+                <td>${item.solution}</td>
+                <td>${formatSeconds(item.seconds)}</td>
+                <td class="${item.correct ? 'status-ok' : 'status-wrong'}">${item.correct ? '✓ jó' : '✗ hibás'}</td>
+            </tr>
+        `;
+    }
+
+    html += "</tbody></table>";
+    wrap.innerHTML = html;
+}
+
+
+function downloadStatsTxt() {
+    const percent = total ? Math.round(correct / total * 100) : 0;
+    const times = history.map(item => item.seconds).sort((x, y) => x - y);
+    const middle = Math.floor(times.length / 2);
+    const median = history.length
+        ? (times.length % 2 ? times[middle] : (times[middle - 1] + times[middle]) / 2)
+        : 0;
+
+    let text = "KIEGÉSZÍTÉS GYAKORLÁS – EREDMÉNY\n";
+    text += "================================\n\n";
+    text += `Feladatok: ${total}\n`;
+    text += `Helyes: ${correct}\n`;
+    text += `Eredmény: ${percent}%\n`;
+    text += `Medián válaszidő: ${history.length ? formatSeconds(median) : "–"}\n\n`;
+    text += "RÉSZLETES EREDMÉNYEK\n";
+    text += "---------------------\n";
+
+    for (const item of history) {
+        text += `${item.number}. ${item.a} + ? = ${item.b} | válasz: ${item.answer} | helyes: ${item.solution} | idő: ${formatSeconds(item.seconds)} | ${item.correct ? "JÓ" : "HIBÁS"}\n`;
+    }
+
+    const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    const now = new Date();
+    const stamp = [
+        now.getFullYear(),
+        String(now.getMonth() + 1).padStart(2, "0"),
+        String(now.getDate()).padStart(2, "0"),
+        "_",
+        String(now.getHours()).padStart(2, "0"),
+        String(now.getMinutes()).padStart(2, "0")
+    ].join("");
+
+    link.href = url;
+    link.download = `kiegeszites_eredmeny_${stamp}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+}
+
+function showStats() {
+    if (nextQuestionTimer) { clearTimeout(nextQuestionTimer); nextQuestionTimer = null; }
+    renderStats();
+    statsModal.classList.add("show");
+}
+
+function hideStats() {
+    statsModal.classList.remove("show");
+    if (!locked) answerEl.focus();
+}
+
+function resetPractice() {
+    if (nextQuestionTimer) { clearTimeout(nextQuestionTimer); nextQuestionTimer = null; }
+    correct = 0;
+    total = 0;
+    streak = 0;
+    history = [];
+    correctEl.textContent = "0";
+    totalEl.textContent = "0";
+    streakEl.textContent = "0";
+    hideStats();
+    newQuestion();
+}
+
+checkButton.addEventListener("click", checkAnswer);
+
+answerEl.addEventListener("keydown", function(event) {
+    if (event.key === "Enter") checkAnswer();
+});
+
+levelEl.addEventListener("change", newQuestion);
+document.getElementById("reset").addEventListener("click", resetPractice);
+document.getElementById("finish").addEventListener("click", showStats);
+document.getElementById("closeStats").addEventListener("click", hideStats);
+document.getElementById("printStats").addEventListener("click", function() { window.print(); });
+document.getElementById("downloadTxt").addEventListener("click", downloadStatsTxt);
+document.getElementById("continueBtn").addEventListener("click", hideStats);
+document.getElementById("restartFromStats").addEventListener("click", resetPractice);
+
+statsModal.addEventListener("click", function(event) {
+    if (event.target === statsModal) hideStats();
+});
+
+newQuestion();
+</script>
+
+</body>
+</html>
