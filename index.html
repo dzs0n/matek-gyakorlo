@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Kiegészítés 20-ig</title>
+    <title>Márk matekgyakorlója</title>
     <style>
         * { box-sizing: border-box; }
 
@@ -205,6 +205,8 @@
         }
 
         @media print {
+            body:has(#choiceStatsModal.show) #statsModal { display:none !important; }
+            body:has(#statsModal.show) #choiceStatsModal { display:none !important; }
             body { background: white; padding: 0; }
             .app { display: none !important; }
             .modal-backdrop { position: static; display: block !important; background: white; padding: 0; }
@@ -224,11 +226,103 @@
             table { font-size: 13px; }
             th, td { padding: 8px 5px; }
         }
+
+        .home, .practice-view {max-width:960px;margin:24px auto;}
+        .home h1 {font-size:clamp(30px,5vw,46px);margin-bottom:8px;}
+        .home p {color:#666;margin-bottom:28px;}
+        .mode-grid {display:grid;grid-template-columns:repeat(auto-fit,minmax(245px,1fr));gap:18px;}
+        .mode-card {display:block;text-align:left;background:white;color:#222;border:1px solid #ddd;border-radius:20px;padding:25px;min-height:195px;box-shadow:0 3px 14px #0000000b;}
+        .mode-card strong {display:block;font-size:23px;margin:12px 0;}
+        .mode-card small {display:block;color:#666;font-size:15px;line-height:1.5;}
+        .mode-card:hover {border-color:#777;transform:translateY(-2px);}
+        .mode-icon {font-size:31px;}
+        .practice-view {display:none;}
+        .back-button {background:transparent;color:#444;border:1px solid #bbb;margin-bottom:16px;font-size:16px;}
+        .practice-panel {background:white;border-radius:20px;padding:24px;box-shadow:0 4px 20px #0000000c;}
+        .practice-head {display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+        .practice-head h2 {margin:0;font-size:23px;}
+        .disc-grid {display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:24px auto 16px;max-width:900px;}
+        .disc {width:100%;aspect-ratio:1;border-radius:50%;background:#14a34a;}
+        .disc.red {background:#df2424;}
+        .disc.green {background:#14a34a;}
+        .disc-equation {text-align:center;font-size:clamp(26px,5vw,36px);font-weight:bold;margin:14px 0;}
+        .red-text {color:#df2424;} .green-text {color:#149c46;}
+        .answer-toggle {width:100%;background:transparent;color:#333;border:1px solid #bbb;margin-top:12px;}
+        .muted-note {color:#777;text-align:center;font-size:15px;margin-top:12px;}
+        .choice-layout {display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:22px;}
+        .choice-column h3 {text-align:center;margin:0 0 12px;}
+        .number-choices {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;}
+        .number-choice {background:#fafafa;border:2px solid #ddd;color:#222;font-size:clamp(22px,4vw,34px);font-weight:bold;min-height:65px;padding:6px;}
+        .number-choice.red-choice {color:#df2424;} .number-choice.green-choice {color:#149c46;}
+        .number-choice.selected-red {background:#ffe4e4;border-color:#df2424;}
+        .number-choice.selected-green {background:#e0f7e8;border-color:#149c46;}
+        .choice-result {font-size:clamp(30px,5vw,42px);font-weight:bold;text-align:center;margin:22px 0 10px;}
+        .choice-feedback {text-align:center;min-height:32px;font-size:21px;font-weight:bold;}
+        .choice-actions {display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:16px;}
+        .choice-actions button:disabled {opacity:.4;cursor:not-allowed;}
+        @media(max-width:550px) {.practice-panel{padding:14px}.disc-grid{gap:5px}.choice-layout{gap:10px}.number-choices{gap:5px}.number-choice{min-height:53px}}
     </style>
 </head>
 <body>
 
-<div class="app">
+
+<section id="home" class="home">
+  <h1>🧮 Márk matekgyakorlója</h1>
+  <p>Válassz egy feladatot! Kezdhetjük a korongokkal, aztán jöhet a számolás.</p>
+  <div class="mode-grid">
+    <button class="mode-card" data-mode="discs"><span class="mode-icon">🔴 🟢</span><strong>1. Korongok felismerése</strong><small>Hány piros és hány zöld? Mondd ki hangosan! Nincs gépelés.</small></button>
+    <button class="mode-card" data-mode="choose"><span class="mode-icon">🔢</span><strong>2. Rakd össze a tízet!</strong><small>Nézd meg a korongokat, és válaszd ki a hozzájuk tartozó két számot!</small></button>
+    <button class="mode-card" data-mode="existing"><span class="mode-icon">✏️</span><strong>3. Mennyi hiányzik?</strong><small>A korábbi számolós gyakorló, nehézségi szintekkel és statisztikával.</small></button>
+  </div>
+</section>
+<section id="discsView" class="practice-view">
+  <button class="back-button" data-home>← Főmenü</button>
+  <div class="practice-panel">
+    <div class="practice-head"><h2>Fordítsd át a korongokat!</h2><button id="newDiscs" class="secondary">⤨ Új feladat</button></div>
+    <div id="discGrid" class="disc-grid" aria-label="Tíz piros és zöld korong"></div>
+    <div id="discEquation" class="disc-equation" aria-live="polite">? + ? = 10</div>
+    <button id="toggleDiscs" class="answer-toggle">Mutasd a választ</button>
+    <div class="muted-note">Márk mondja meg, mennyi a piros és mennyi a zöld. A választ te fedheted fel.</div>
+  </div>
+</section>
+<section id="chooseView" class="practice-view">
+  <button class="back-button" data-home>← Főmenü</button>
+  <div class="practice-panel">
+    <div class="practice-head"><h2>Rakd össze a tízet!</h2><button id="choiceStatsBtn" class="secondary">Vége / Statisztika</button></div>
+    <div id="choiceDiscGrid" class="disc-grid" aria-label="A kirakandó tíz korong"></div>
+    <div class="muted-note">Nézd meg a korongokat! Hány piros és hány zöld van?</div>
+    <div class="choice-layout">
+      <div class="choice-column"><h3 class="red-text">🔴 Piros</h3><div id="redChoices" class="number-choices"></div></div>
+      <div class="choice-column"><h3 class="green-text">🟢 Zöld</h3><div id="greenChoices" class="number-choices"></div></div>
+    </div>
+    <div id="choiceResult" class="choice-result"><span class="red-text">?</span> + <span class="green-text">?</span> = 10</div>
+    <div id="choiceFeedback" class="choice-feedback" aria-live="polite"></div>
+    <div class="choice-actions"><span id="choiceProgress" class="muted-note" aria-live="polite">0 feladat · 0 helyes</span></div>
+    <div class="muted-note">Válaszd ki pontosan a fenti piros és zöld korongok számát! A 0 is választható.</div>
+  </div>
+</section>
+
+<div id="choiceStatsModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Korongos gyakorlás eredménye">
+  <div class="modal">
+    <div class="modal-header"><h2>Korongos gyakorlás eredménye</h2><button id="closeChoiceStats" class="secondary">Bezárás</button></div>
+    <div class="summary-grid">
+      <div class="summary-box"><strong id="choiceSumTotal">0</strong>feladat</div>
+      <div class="summary-box"><strong id="choiceSumCorrect">0</strong>helyes</div>
+      <div class="summary-box"><strong id="choiceSumPercent">0%</strong>eredmény</div>
+      <div class="summary-box"><strong id="choiceSumMedian">–</strong>medián válaszidő</div>
+    </div>
+    <div id="choiceStatsTable"></div>
+    <div class="modal-actions">
+      <button id="printChoiceStats" class="secondary">Nyomtatás / PDF</button>
+      <button id="downloadChoiceStats" class="secondary">TXT letöltés</button>
+      <button id="continueChoiceStats" class="secondary">Folytatás</button>
+      <button id="restartChoiceStats">Új gyakorlás</button>
+    </div>
+  </div>
+</div>
+
+<div class="app" id="existingView" style="display:none">
+    <button class="back-button" data-home>← Főmenü</button>
     <div class="toolbar">
         <label>
             Nehézség
@@ -566,6 +660,186 @@ statsModal.addEventListener("click", function(event) {
 });
 
 newQuestion();
+
+// Főmenü és a két új korongos gyakorlási mód.
+const homeView = document.getElementById('home');
+const views = {discs: document.getElementById('discsView'), choose: document.getElementById('chooseView'), existing: document.getElementById('existingView')};
+function showMode(mode) {
+    homeView.style.display = mode ? 'none' : 'block';
+    Object.entries(views).forEach(([name, view]) => { view.style.display = name === mode ? 'block' : 'none'; });
+    if (mode === 'discs') newDiscExercise();
+    if (mode === 'choose') resetChoiceExercise();
+    if (mode === 'existing') answerEl.focus();
+    window.scrollTo(0, 0);
+}
+document.querySelectorAll('[data-mode]').forEach(btn => btn.addEventListener('click', () => showMode(btn.dataset.mode)));
+document.querySelectorAll('[data-home]').forEach(btn => btn.addEventListener('click', () => {
+    if (nextQuestionTimer) { clearTimeout(nextQuestionTimer); nextQuestionTimer = null; }
+    if (choiceNextTimer !== null) { clearTimeout(choiceNextTimer); choiceNextTimer = null; }
+    statsModal.classList.remove('show');
+    choiceModal.classList.remove('show');
+    showMode(null);
+}));
+
+let redDiscCount = 0;
+let discAnswerVisible = false;
+function renderDiscs() {
+    const grid = document.getElementById('discGrid');
+    grid.replaceChildren();
+    for (let i = 0; i < 10; i++) {
+        const disc = document.createElement('div');
+        disc.className = 'disc ' + (i < redDiscCount ? 'red' : 'green');
+        grid.appendChild(disc);
+    }
+    document.getElementById('discEquation').innerHTML = discAnswerVisible
+        ? `<span class="red-text">${redDiscCount}</span> + <span class="green-text">${10-redDiscCount}</span> = 10`
+        : '<span class="red-text">?</span> + <span class="green-text">?</span> = 10';
+    document.getElementById('toggleDiscs').textContent = discAnswerVisible ? 'Takard el a választ' : 'Mutasd a választ';
+}
+function newDiscExercise() {
+    // Ne legyen kétszer egymás után ugyanaz a feladat.
+    let next;
+    do { next = randomInt(0, 10); } while (next === redDiscCount);
+    redDiscCount = next;
+    discAnswerVisible = false;
+    renderDiscs();
+}
+document.getElementById('newDiscs').addEventListener('click', newDiscExercise);
+document.getElementById('toggleDiscs').addEventListener('click', () => { discAnswerVisible = !discAnswerVisible; renderDiscs(); });
+
+let selectedRed = null;
+let selectedGreen = null;
+let choiceChecked = false;
+let targetChoiceRed = null;
+let choiceStartedAt = performance.now();
+let choiceHistory = [];
+let choiceNextTimer = null;
+const choiceModal = document.getElementById('choiceStatsModal');
+
+function renderChoiceDiscs() {
+    const grid = document.getElementById('choiceDiscGrid');
+    grid.replaceChildren();
+    for (let i = 0; i < 10; i++) {
+        const disc = document.createElement('div');
+        disc.className = 'disc ' + (i < targetChoiceRed ? 'red' : 'green');
+        grid.appendChild(disc);
+    }
+}
+function renderChoices() {
+    for (const [color, parentId, selected] of [['red','redChoices',selectedRed], ['green','greenChoices',selectedGreen]]) {
+        const parent = document.getElementById(parentId);
+        parent.replaceChildren();
+        for (let number = 0; number <= 10; number++) {
+            const btn = document.createElement('button');
+            btn.className = `number-choice ${color}-choice` + (number === selected ? ` selected-${color}` : '');
+            btn.textContent = number;
+            btn.disabled = choiceChecked;
+            btn.setAttribute('aria-pressed', number === selected ? 'true' : 'false');
+            btn.addEventListener('click', () => {
+                if (choiceChecked) return;
+                if (color === 'red') selectedRed = number;
+                else selectedGreen = number;
+                renderChoices();
+                if (selectedRed !== null && selectedGreen !== null) submitChoice();
+            });
+            parent.appendChild(btn);
+        }
+    }
+    document.getElementById('choiceResult').innerHTML = `<span class="red-text">${selectedRed ?? '?'}</span> + <span class="green-text">${selectedGreen ?? '?'}</span> = 10`;
+}
+function nextChoiceExercise() {
+    if (choiceNextTimer !== null) { clearTimeout(choiceNextTimer); choiceNextTimer = null; }
+    let next;
+    do { next = randomInt(0, 10); } while (next === targetChoiceRed);
+    targetChoiceRed = next;
+    selectedRed = null;
+    selectedGreen = null;
+    choiceChecked = false;
+    document.getElementById('choiceFeedback').textContent = '';
+    renderChoiceDiscs();
+    renderChoices();
+    choiceStartedAt = performance.now();
+}
+function updateChoiceProgress() {
+    const correctCount = choiceHistory.filter(x => x.correct).length;
+    document.getElementById('choiceProgress').textContent = `${choiceHistory.length} feladat · ${correctCount} helyes`;
+}
+function submitChoice() {
+    if (choiceChecked || selectedRed === null || selectedGreen === null) return;
+    choiceChecked = true;
+    const correctChoice = selectedRed === targetChoiceRed && selectedGreen === 10 - targetChoiceRed;
+    const seconds = (performance.now() - choiceStartedAt) / 1000;
+    choiceHistory.push({number: choiceHistory.length + 1, red: targetChoiceRed, green: 10 - targetChoiceRed, selectedRed, selectedGreen, correct: correctChoice, seconds});
+    const feedback = document.getElementById('choiceFeedback');
+    feedback.textContent = correctChoice ? '✓ Jó!' : `✗ Rossz! A helyes válasz: ${targetChoiceRed} + ${10 - targetChoiceRed}`;
+    feedback.style.color = correctChoice ? '#14843e' : '#b00020';
+    updateChoiceProgress();
+    renderChoices();
+    choiceNextTimer = setTimeout(() => { choiceNextTimer = null; nextChoiceExercise(); }, 1600);
+}
+function choiceMedian() {
+    if (!choiceHistory.length) return null;
+    const times = choiceHistory.map(x => x.seconds).sort((a,b) => a-b);
+    const mid = Math.floor(times.length / 2);
+    return times.length % 2 ? times[mid] : (times[mid-1]+times[mid])/2;
+}
+function renderChoiceStats() {
+    const total = choiceHistory.length;
+    const correctCount = choiceHistory.filter(x => x.correct).length;
+    document.getElementById('choiceSumTotal').textContent = total;
+    document.getElementById('choiceSumCorrect').textContent = correctCount;
+    document.getElementById('choiceSumPercent').textContent = total ? Math.round(correctCount/total*100)+'%' : '0%';
+    const median = choiceMedian();
+    document.getElementById('choiceSumMedian').textContent = median === null ? '–' : formatSeconds(median);
+    const wrap = document.getElementById('choiceStatsTable');
+    if (!total) { wrap.innerHTML = '<div class="empty-state">Még nincs megoldott feladat.</div>'; return; }
+    const rows = choiceHistory.map(x => `<tr class="${x.correct ? 'correct-row' : 'wrong'}"><td>${x.number}.</td><td>${x.red} + ${x.green} = 10</td><td>${x.selectedRed} + ${x.selectedGreen}</td><td>${formatSeconds(x.seconds)}</td><td class="${x.correct ? 'status-ok' : 'status-wrong'}">${x.correct ? '✓ jó' : '✗ hibás'}</td></tr>`).join('');
+    wrap.innerHTML = `<table><thead><tr><th>#</th><th>Feladat</th><th>Válasz</th><th>Idő</th><th>Eredmény</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+function openChoiceStats() {
+    if (choiceNextTimer !== null) { clearTimeout(choiceNextTimer); choiceNextTimer = null; }
+    renderChoiceStats();
+    choiceModal.classList.add('show');
+}
+function closeChoiceStats() {
+    choiceModal.classList.remove('show');
+    if (choiceChecked) nextChoiceExercise();
+    else choiceStartedAt = performance.now();
+}
+function restartChoicePractice() {
+    choiceHistory = [];
+    updateChoiceProgress();
+    choiceModal.classList.remove('show');
+    nextChoiceExercise();
+}
+function downloadChoiceStats() {
+    const total = choiceHistory.length;
+    const correctCount = choiceHistory.filter(x => x.correct).length;
+    const median = choiceMedian();
+    let content = 'KORONGOS GYAKORLÁS – EREDMÉNY\n================================\n\n';
+    content += `Feladatok: ${total}\nHelyes: ${correctCount}\nEredmény: ${total ? Math.round(correctCount/total*100) : 0}%\nMedián válaszidő: ${median === null ? '–' : formatSeconds(median)}\n\nRÉSZLETES EREDMÉNYEK\n---------------------\n`;
+    for (const x of choiceHistory) content += `${x.number}. ${x.red} + ${x.green} = 10 | válasz: ${x.selectedRed} + ${x.selectedGreen} | idő: ${formatSeconds(x.seconds)} | ${x.correct ? 'JÓ' : 'HIBÁS'}\n`;
+    const blob = new Blob([content], {type:'text/plain;charset=utf-8'});
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    const now = new Date();
+    const stamp = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}`;
+    link.href = url;
+    link.download = `korongos_eredmeny_${stamp}.txt`;
+    document.body.appendChild(link);
+    link.click(); link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+document.getElementById('choiceStatsBtn').addEventListener('click', openChoiceStats);
+document.getElementById('closeChoiceStats').addEventListener('click', closeChoiceStats);
+document.getElementById('continueChoiceStats').addEventListener('click', closeChoiceStats);
+document.getElementById('restartChoiceStats').addEventListener('click', restartChoicePractice);
+document.getElementById('printChoiceStats').addEventListener('click', () => window.print());
+document.getElementById('downloadChoiceStats').addEventListener('click', downloadChoiceStats);
+choiceModal.addEventListener('click', e => {if(e.target === choiceModal) closeChoiceStats();});
+function resetChoiceExercise() { restartChoicePractice(); }
+resetChoiceExercise();
+
 </script>
 
 </body>
