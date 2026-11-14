@@ -7,7 +7,7 @@
 
     <title>Tízes átlépés korongokkal – Matekgyakorló</title>
 
-    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="../style.css?v=20261114170903">
     <style>
         /* ten-crossing counter and calculation */
         .ten-partial-calculation {
@@ -30,6 +30,39 @@
         }
         #tenBank { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-start; gap: 6px; }
     </style>
+<!-- MATEK-CACHE-START -->
+<script>
+(() => {
+  const versionFile = new URL('../version.js?v=20261114170903on', document.baseURI);
+  const current = '20261114170903';
+  let refreshing = false;
+  async function checkVersion() {
+    if (refreshing) return;
+    try {
+      const response = await fetch(versionFile.href + '?t=' + Date.now(), {
+        cache: 'no-store'
+      });
+      if (!response.ok) return;
+      const data = await response.json();
+      if (data.version && data.version !== current) {
+        refreshing = true;
+        const url = new URL(location.href);
+        url.searchParams.set('site_version', data.version);
+        location.replace(url.href);
+      }
+    } catch (_) { /* Offline: keep the page usable. */ }
+  }
+  window.addEventListener('pageshow', checkVersion);
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) checkVersion();
+  });
+  window.addEventListener('focus', checkVersion);
+  setInterval(() => {
+    if (!document.hidden) checkVersion();
+  }, 60000);
+})();
+</script>
+<!-- MATEK-CACHE-END -->
 </head>
 
 <body>
@@ -229,7 +262,7 @@
     <!-- JavaScript modul -->
     <script
         type="module"
-        src="../js/ten-crossing.js"
+        src="../js/ten-crossing.js?v=20261114170903"
     ></script>
 </body>
 </html>

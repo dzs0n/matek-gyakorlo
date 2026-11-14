@@ -1,5 +1,5 @@
 
-import { randomInt, formatSeconds } from "./utils.js";
+import { randomInt, formatSeconds } from "./utils.js?v=20261114170903";
 
 // ==================================================
 // HTML-elemek

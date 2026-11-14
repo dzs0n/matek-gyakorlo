@@ -1,4 +1,4 @@
-import { exercises } from "./catalog.js";
+import { exercises } from "./catalog.js?v=20261114170903";
 const grade = document.getElementById("grade");
 const subject = document.getElementById("subject");
 const topic = document.getElementById("topic");

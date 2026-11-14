@@ -1,4 +1,4 @@
-import { randomInt } from "./utils.js";
+import { randomInt } from "./utils.js?v=20261114170903";
 let redDiscCount = 0;
 let discAnswerVisible = false;
 function renderDiscs() {
