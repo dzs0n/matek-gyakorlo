@@ -437,6 +437,8 @@ function submitAnswer() {
     finishQuestion(method);
 }
 
+$("tenSubmit").addEventListener("click", submitAnswer);
+
 answerInput.addEventListener("keydown", (event) => {
     if (event.key === "Enter") {
         event.preventDefault();
