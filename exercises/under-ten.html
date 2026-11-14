@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Összeadás 10 alatt – Matekgyakorló</title>
+<link rel="stylesheet" href="../style.css">
+<style>
+.under-panel{max-width:760px;margin:auto}
+.under-answer{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;margin:24px 0}
+.under-answer label{font-size:clamp(21px,5vw,30px);font-weight:700}
+.under-answer input{width:110px;max-width:35vw;text-align:center;font-size:30px;font-weight:700;padding:10px;border:2px solid #aab0b8;border-radius:10px}
+.under-answer button{min-width:60px;min-height:55px;font-size:28px;touch-action:manipulation}
+.under-frame{margin:22px auto 10px}
+.under-cell{cursor:default;pointer-events:none}
+.under-feedback{text-align:center;min-height:26px;font-size:16px;color:#16823b}
+.under-panel .ten-equation{margin-top:14px}
+.under-level{display:flex;align-items:center;justify-content:center;gap:12px;margin:14px auto;font-weight:600}
+.under-level select{font:inherit;padding:8px 12px;border-radius:8px;max-width:160px}
+</style>
+<script src="../js/matek-shared.js"></script>
+</head>
+<body>
+<header class="site-header"></header>
+<section class="practice-view" style="display:block">
+<a class="back-button" href="../index.html" style="display:inline-block;text-decoration:none">← Főmenü</a>
+<div class="practice-panel under-panel">
+<div class="practice-head"><h2>Összeadás 10 alatt</h2><button id="underStatsBtn" class="secondary" type="button">Vége / Statisztika</button></div>
+<div class="under-level"><label for="underDifficulty">Nehézség:</label> <select id="underDifficulty" aria-label="Nehézség"><option value="easy">Könnyű</option><option value="hard">Nehéz</option></select></div>
+<div class="ten-equation" id="underEquation" aria-live="polite"></div>
+<div class="ten-frame under-frame" id="underFrame" aria-label="Tízhelyes korongkeret"></div>
+<form class="under-answer" id="underForm" autocomplete="off">
+<label for="underInput">Eredmény =</label>
+<input id="underInput" type="number" inputmode="numeric" min="2" max="9" step="1" required aria-label="Összeadás eredménye">
+<button id="underSubmit" type="submit" aria-label="Válasz ellenőrzése">✓</button>
+</form>
+<div class="under-feedback" id="underFeedback" aria-live="polite"></div>
+</div></section>
+<div id="underStatsModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Összeadás 10 alatt – eredmények">
+<div class="modal">
+<div class="modal-header"><h2>Összeadás 10 alatt – eredmények</h2><button type="button" class="secondary" id="underClose">Bezárás</button></div>
+<div id="underDetails"></div>
+<div class="modal-actions"><button type="button" class="secondary" id="underDownload">CSV letöltés</button><button type="button" class="secondary" id="underContinue">Folytatás</button><button type="button" id="underRestart">Új gyakorlás</button></div>
+</div></div>
+<script src="../js/under-ten.js" defer></script>
+</body></html>

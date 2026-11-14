@@ -1,5 +1,5 @@
 
-import { randomInt, formatSeconds } from "./utils.js?v=20261114170903";
+import { randomInt, formatSeconds } from "./utils.js?v=20261114203631";
 
 // ==================================================
 // HTML-elemek
@@ -12,6 +12,7 @@ const upperFrame = $("tenUpper");
 const lowerFrame = $("tenLower");
 const bank = $("tenBank");
 const answerInput = $("tenAnswer");
+const matekSession = MatekShared.create({anchor:".ten-settings",modal:"#tenStatsModal"});
 
 // ==================================================
 // Állapot
@@ -123,17 +124,19 @@ function generate() {
 
     const level = $("tenLevel").value;
 
-    const min =
-        level === "easy" ? 8 :
-        level === "medium" ? 6 : 2;
-
-    let pair;
-
-    do {
-        a = randomInt(min, 9);
-        b = randomInt(11 - a, 9);
-        pair = `${a}+${b}`;
-    } while (pair === previous);
+    const min = level === "easy" ? 8 : 2;
+    const maxAdd = level === "hard" ? 9 : 5;
+    const pairs = [];
+    for (let first = min; first <= 9; first++) {
+        for (let second = Math.max(2, 11 - first); second <= maxAdd; second++) {
+            pairs.push([first, second]);
+        }
+    }
+    if (!pairs.length) throw new Error("Nincs feladat ezen a szinten");
+    const eligible = pairs.filter(([x,y]) => `${x}+${y}` !== previous);
+    const pool = eligible.length ? eligible : pairs;
+    [a,b] = pool[randomInt(0, pool.length - 1)];
+    const pair = `${a}+${b}`;
 
     previous = pair;
 
@@ -352,6 +355,7 @@ function finishQuestion(method) {
 
     const seconds = elapsedQuestionSeconds();
 
+    matekSession.record({correct:mistakes===0,seconds});
     history.push({
         a,
         b,
@@ -603,6 +607,7 @@ $("tenRestart").addEventListener("click", () => {
     cancelNext();
 
     history = [];
+    matekSession.reset();
     previous = "";
 
     sessionStarted = performance.now();

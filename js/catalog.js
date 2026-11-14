@@ -1,43 +1,80 @@
-
 export const exercises = [
   {
-    id: "discs",
-    title: "Korongok felismerése",
+    id: "m.1",
+    title: "Számold meg a korongokat!",
     grades: [1, 2],
     subject: "Matematika",
     topic: "Számfogalom · A tíz bontása",
     icon: "🔴 🟢",
-    description: "Hány piros és hány zöld? Mondd ki hangosan! Nincs gépelés.",
-    url: "exercises/discs.html"
+    description: 'Ismerd fel, hány kék korongot látsz!',
+    url: "exercises/discs.html",
+    legacyId: "discs",
+    level: 1,
+    rangeLabel: "1–10"
   },
   {
-    id: "choose",
+    id: "m.2",
+    title: "Összeadás 10 alatt",
+    grades: [1, 2],
+    subject: "Matematika",
+    topic: "Összeadás · 10 alatti összegek",
+    icon: "🔴 🟢",
+    description: 'Összeadás 10 alatt: korongokkal vagy fejben.',
+    url: "exercises/under-ten.html",
+    legacyId: "under-ten",
+    level: 1,
+    rangeLabel: "2–9"
+  },
+  {
+    id: "m.3",
+    title: "Kivonás 10 alatt",
+    grades: [1, 2],
+    subject: "Matematika",
+    topic: "Kivonás · 10-es számkör",
+    icon: "🔴",
+    description: 'Kivonás 10 alatt: korongokkal vagy fejben.',
+    url: "exercises/sub-under-ten.html",
+    legacyId: "sub-under-ten",
+    level: 1,
+    rangeLabel: "0–9"
+  },
+  {
+    id: "m.4",
     title: "Rakd össze a tízet!",
     grades: [1, 2],
     subject: "Matematika",
     topic: "Számfogalom · A tíz bontása",
     icon: "🔢",
-    description: "Nézd meg a korongokat, és válaszd ki a hozzájuk tartozó két számot!",
-    url: "exercises/choose.html"
+    description: 'Válaszd ki a tíz bontásához tartozó két számot!',
+    url: "exercises/choose.html",
+    legacyId: "choose",
+    level: 1,
+    rangeLabel: "10"
   },
   {
-    id: "ten-crossing",
+    id: "m.5",
     title: "Tízes átlépés korongokkal",
     grades: [1, 2],
     subject: "Matematika",
     topic: "Összeadás · Tízes átlépés · 20-as számkör",
     icon: "🔴 🟢",
-    description: "Húzd át a korongokat: előbb egészítsd ki a tízet, aztán rakd ki a maradékot!",
-    url: "exercises/ten-crossing.html"
+    description: 'Tízes átlépés korongokkal és fejben.',
+    url: "exercises/ten-crossing.html",
+    legacyId: "ten-crossing",
+    level: 2,
+    rangeLabel: "11–18"
   },
   {
-    id: "existing",
+    id: "m.6",
     title: "Mennyi hiányzik?",
     grades: [1, 2],
     subject: "Matematika",
     topic: "Összeadás · Hiányzó tag · 20-as számkör",
     icon: "✏️",
-    description: "Hiányzó összeadandó gyakorlása, nehézségi szintekkel és statisztikával.",
-    url: "exercises/existing.html"
+    description: 'Gyakorold a hiányzó szám megtalálását!',
+    url: "exercises/existing.html",
+    legacyId: "existing",
+    level: 2,
+    rangeLabel: "0–20"
   }
 ];

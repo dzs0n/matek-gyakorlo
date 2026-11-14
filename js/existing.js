@@ -1,4 +1,4 @@
-import { randomInt, formatSeconds } from "./utils.js?v=20261114170903";
+import { randomInt, formatSeconds } from "./utils.js?v=20261114203631";
 
 let a = 7;
 let b = 12;
@@ -21,6 +21,7 @@ const streakEl = document.getElementById("streak");
 const checkButton = document.getElementById("check");
 const levelEl = document.getElementById("level");
 const statsModal = document.getElementById("statsModal");
+const matekSession = MatekShared.create({anchor:".toolbar",modal:"#statsModal"});
 
 function newQuestion() {
     if (nextQuestionTimer) { clearTimeout(nextQuestionTimer); nextQuestionTimer = null; }
@@ -84,6 +85,7 @@ function checkAnswer() {
         feedbackEl.style.color = "red";
     }
 
+    matekSession.record({correct:isCorrect,seconds});
     history.push({
         number: total,
         a: a,
@@ -224,6 +226,7 @@ function resetPractice() {
     total = 0;
     streak = 0;
     history = [];
+    matekSession.reset();
     correctEl.textContent = "0";
     totalEl.textContent = "0";
     streakEl.textContent = "0";

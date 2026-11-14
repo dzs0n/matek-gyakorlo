@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kivonás 10 alatt – Matekgyakorló</title>
+<link rel="stylesheet" href="../style.css">
+<style>
+.subUnder-panel{max-width:760px;margin:auto}
+.subUnder-answer{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;margin:24px 0}
+.subUnder-answer label{font-size:clamp(21px,5vw,30px);font-weight:700}
+.subUnder-answer input{width:110px;max-width:35vw;text-align:center;font-size:30px;font-weight:700;padding:10px;border:2px solid #aab0b8;border-radius:10px}
+.subUnder-answer button{min-width:60px;min-height:55px;font-size:28px;touch-action:manipulation}
+.subUnder-frame{margin:22px auto 10px}
+.subUnder-cell{cursor:default;pointer-events:none}
+.subUnder-frame .ten-green{opacity:.35;position:relative}
+.subUnder-frame .ten-green::after{content:"";position:absolute;left:-12%;top:48%;width:124%;height:3px;background:#374151;transform:rotate(-35deg)}
+.subUnder-feedback{text-align:center;min-height:26px;font-size:16px;color:#16823b}
+.subUnder-panel .ten-equation{margin-top:14px}
+.subUnder-level{display:flex;align-items:center;justify-content:center;gap:12px;margin:14px auto;font-weight:600}
+.subUnder-level select{font:inherit;padding:8px 12px;border-radius:8px;max-width:160px}
+</style>
+<script src="../js/matek-shared.js"></script>
+</head>
+<body>
+<header class="site-header"></header>
+<section class="practice-view" style="display:block">
+<a class="back-button" href="../index.html" style="display:inline-block;text-decoration:none">← Főmenü</a>
+<div class="practice-panel subUnder-panel">
+<div class="practice-head"><h2>Kivonás 10 alatt</h2><button id="subUnderStatsBtn" class="secondary" type="button">Vége / Statisztika</button></div>
+<div class="subUnder-level"><label for="subUnderDifficulty">Nehézség:</label> <select id="subUnderDifficulty" aria-label="Nehézség"><option value="easy">Könnyű</option><option value="hard">Nehéz</option></select></div>
+<div class="ten-equation" id="subUnderEquation" aria-live="polite"></div>
+<div class="ten-frame subUnder-frame" id="subUnderFrame" aria-label="Tízhelyes korongkeret"></div>
+<form class="subUnder-answer" id="subUnderForm" autocomplete="off">
+<label for="subUnderInput">Eredmény =</label>
+<input id="subUnderInput" type="number" inputmode="numeric" min="0" max="9" step="1" required aria-label="Kivonás eredménye">
+<button id="subUnderSubmit" type="submit" aria-label="Válasz ellenőrzése">✓</button>
+</form>
+<div class="subUnder-feedback" id="subUnderFeedback" aria-live="polite"></div>
+</div></section>
+<div id="subUnderStatsModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Kivonás 10 alatt – eredmények">
+<div class="modal">
+<div class="modal-header"><h2>Kivonás 10 alatt – eredmények</h2><button type="button" class="secondary" id="subUnderClose">Bezárás</button></div>
+<div id="subUnderDetails"></div>
+<div class="modal-actions"><button type="button" class="secondary" id="subUnderDownload">CSV letöltés</button><button type="button" class="secondary" id="subUnderContinue">Folytatás</button><button type="button" id="subUnderRestart">Új gyakorlás</button></div>
+</div></div>
+<script src="../js/sub-under-ten.js" defer></script>
+</body></html>

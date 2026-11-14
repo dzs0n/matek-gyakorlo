@@ -7,7 +7,7 @@
 
     <title>Tízes átlépés korongokkal – Matekgyakorló</title>
 
-    <link rel="stylesheet" href="../style.css?v=1794676788">
+    <link rel="stylesheet" href="../style.css?v=20261114203631">
     <style>
         /* ten-crossing counter and calculation */
         .ten-partial-calculation {
@@ -33,7 +33,7 @@
 <!-- MATEK-CACHE-START -->
 <script>
 (() => {
-  const versionFile = new URL('../version.js?v=20261114170903on', document.baseURI);
+  const versionFile = new URL('../version.json', document.baseURI);
   const current = '20261114170903';
   let refreshing = false;
   async function checkVersion() {
@@ -63,6 +63,7 @@
 })();
 </script>
 <!-- MATEK-CACHE-END -->
+<script src="../js/matek-shared.js"></script>
 </head>
 
 <body>
@@ -97,32 +98,14 @@
                 <label for="tenLevel">Nehézség</label>
 
                 <select id="tenLevel">
-                    <option value="easy">
-                        Könnyű (8–9-ről indul)
-                    </option>
-
-                    <option value="medium" selected>
-                        Közepes (6–9-ről indul)
-                    </option>
-
-                    <option value="all">
-                        Vegyes (2–9-ről indul)
-                    </option>
+                    <option value="easy">Könnyű</option>
+                    <option value="medium" selected>Közepes</option>
+                    <option value="hard">Nehéz</option>
                 </select>
             </div>
 
             <!-- Gyakorlási idő és megoldott feladatok -->
-            <div class="ten-session-info">
-                <div class="ten-session-item">
-                    <span>Gyakorlási idő</span>
-                    <strong id="tenSessionTime">00:00</strong>
-                </div>
-
-                <div class="ten-session-item">
-                    <span>Megoldott feladatok</span>
-                    <strong id="tenSessionCount">0</strong>
-                </div>
-            </div>
+            <div hidden><strong id="tenSessionTime"></strong><strong id="tenSessionCount"></strong></div>
 
             <!-- Aktuális feladat -->
             <div class="ten-equation" id="tenEquation">
@@ -143,10 +126,7 @@
             </div>
 
             <div id="tenPartialCalculation" class="ten-partial-calculation" aria-live="polite"></div>
-            <p class="muted-note">
-                Koppints az üres négyzetekre, vagy húzd oda a zöld korongokat!
-                Először töltsd tele az alsó keretet.
-            </p>
+            
 
             <!-- Felső tízes keret -->
             <div
@@ -163,9 +143,7 @@
             ></div>
 
             <!-- Áthelyezhető zöld korongok -->
-            <div class="ten-frame-label">
-                Áthelyezendő korongok
-            </div>
+            
 
             <div
                 class="ten-bank"
@@ -181,15 +159,7 @@
             ></div>
 
             <!-- Feladat vezérlése -->
-            <div class="ten-footer">
-                <span id="tenProgress" class="muted-note">
-                    0 feladat
-                </span>
-
-                <button class="secondary" id="tenReset">
-                    Feladat újrakezdése
-                </button>
-            </div>
+            <div hidden><span id="tenProgress"></span><button id="tenReset" type="button"></button></div>
 
         </div>
     </section>
@@ -263,7 +233,7 @@
     <!-- JavaScript modul -->
     <script
         type="module"
-        src="../js/ten-crossing.js?v=1794676788"
+        src="../js/ten-crossing.js?v=20261114203631"
     ></script>
 </body>
 </html>

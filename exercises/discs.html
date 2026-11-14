@@ -1,48 +1,34 @@
 <!doctype html>
-<html lang="hu"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Korongok felismerése – Matekgyakorló</title><link rel="stylesheet" href="../style.css?v=1794676788"><!-- MATEK-CACHE-START -->
-<script>
-(() => {
-  const versionFile = new URL('../version.js?v=20261114170903on', document.baseURI);
-  const current = '20261114170903';
-  let refreshing = false;
-  async function checkVersion() {
-    if (refreshing) return;
-    try {
-      const response = await fetch(versionFile.href + '?t=' + Date.now(), {
-        cache: 'no-store'
-      });
-      if (!response.ok) return;
-      const data = await response.json();
-      if (data.version && data.version !== current) {
-        refreshing = true;
-        const url = new URL(location.href);
-        url.searchParams.set('site_version', data.version);
-        location.replace(url.href);
-      }
-    } catch (_) { /* Offline: keep the page usable. */ }
-  }
-  window.addEventListener('pageshow', checkVersion);
-  document.addEventListener('visibilitychange', () => {
-    if (!document.hidden) checkVersion();
-  });
-  window.addEventListener('focus', checkVersion);
-  setInterval(() => {
-    if (!document.hidden) checkVersion();
-  }, 60000);
-})();
-</script>
-<!-- MATEK-CACHE-END -->
+<html lang="hu">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Számold meg a korongokat – Matekgyakorló</title>
+  <link rel="stylesheet" href="../style.css">
+  <script src="../js/matek-shared.js"></script>
+  <style>
+    #discsView .disc-grid {display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:24px auto 20px;max-width:900px}
+    #discsView .disc {width:100%;aspect-ratio:1;border-radius:50%;background:#3B82F6;box-shadow:inset 0 -3px 5px #2563eb22}
+    #discsView .disc.empty {background:transparent;box-shadow:none}
+    #discsView .disc-answer {display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;margin:22px auto 8px;font-size:clamp(18px,3vw,26px);font-weight:650}
+    #discsView .disc-answer input {width:100px;max-width:35vw;padding:10px 12px;font:inherit;text-align:center;border:1px solid #aab7c7;border-radius:10px}
+    #discsView .disc-answer button {min-width:58px;min-height:48px;font-size:24px}
+    @media(max-width:550px){#discsView .disc-grid{gap:5px}}
+  </style>
 </head>
-<body><header class="site-header"><div class="exercise-meta">Matematika · 1–2. évfolyam · Számfogalom · A tíz bontása</div></header>
-<section id="discsView" class="practice-view" style="display:block" class="practice-view">
+<body>
+<section id="discsView" class="practice-view" style="display:block">
   <a class="back-button" href="../index.html" style="display:inline-block;text-decoration:none">← Főmenü</a>
   <div class="practice-panel">
-    <div class="practice-head"><h2>Fordítsd át a korongokat!</h2><button id="newDiscs" class="secondary">⤨ Új feladat</button></div>
-    <div id="discGrid" class="disc-grid" aria-label="Tíz piros és zöld korong"></div>
-    <div id="discEquation" class="disc-equation" aria-live="polite">? + ? = 10</div>
-    <button id="toggleDiscs" class="answer-toggle">Mutasd a választ</button>
-    <div class="muted-note">Márk mondja meg, mennyi a piros és mennyi a zöld. A választ te fedheted fel.</div>
+    <div class="practice-head"><h2>Számold meg a korongokat!</h2><button id="discsStats" class="secondary" type="button">Vége / Statisztika</button></div>
+    <div id="discGrid" class="disc-grid" aria-label="Kék korongok ötös elrendezésben"></div>
+    <form id="discAnswerForm" class="disc-answer" autocomplete="off">
+      <label for="discAnswer">Korongok száma =</label>
+      <input id="discAnswer" type="number" inputmode="numeric" min="1" max="10" step="1" required aria-label="Korongok száma">
+      <button id="discSubmit" type="submit" aria-label="Válasz ellenőrzése">✓</button>
+    </form>
   </div>
 </section>
-
-<script type="module" src="../js/discs.js?v=1794676788"></script></body></html>
+<script type="module" src="../js/discs.js"></script>
+</body>
+</html>

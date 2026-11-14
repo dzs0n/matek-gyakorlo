@@ -1,8 +1,8 @@
 <!doctype html>
-<html lang="hu"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Rakd össze a tízet! – Matekgyakorló</title><link rel="stylesheet" href="../style.css?v=1794676788"><!-- MATEK-CACHE-START -->
+<html lang="hu"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Rakd össze a tízet! – Matekgyakorló</title><link rel="stylesheet" href="../style.css?v=20261114203631"><!-- MATEK-CACHE-START -->
 <script>
 (() => {
-  const versionFile = new URL('../version.js?v=20261114170903on', document.baseURI);
+  const versionFile = new URL('../version.json', document.baseURI);
   const current = '20261114170903';
   let refreshing = false;
   async function checkVersion() {
@@ -32,6 +32,7 @@
 })();
 </script>
 <!-- MATEK-CACHE-END -->
+<script src="../js/matek-shared.js"></script>
 </head>
 <body><header class="site-header"><div class="exercise-meta">Matematika · 1–2. évfolyam · Számfogalom · A tíz bontása</div></header>
 <section id="chooseView" class="practice-view" style="display:block" class="practice-view">
@@ -39,15 +40,14 @@
   <div class="practice-panel">
     <div class="practice-head"><h2>Rakd össze a tízet!</h2><button id="choiceStatsBtn" class="secondary">Vége / Statisztika</button></div>
     <div id="choiceDiscGrid" class="disc-grid" aria-label="A kirakandó tíz korong"></div>
-    <div class="muted-note">Nézd meg a korongokat! Hány piros és hány zöld van?</div>
     <div class="choice-layout">
-      <div class="choice-column"><h3 class="red-text">🔴 Piros</h3><div id="redChoices" class="number-choices"></div></div>
-      <div class="choice-column"><h3 class="green-text">🟢 Zöld</h3><div id="greenChoices" class="number-choices"></div></div>
+      <div class="choice-column"><div id="redChoices" class="number-choices"></div></div>
+      <div class="choice-column"><div id="greenChoices" class="number-choices"></div></div>
     </div>
     <div id="choiceResult" class="choice-result"><span class="red-text">?</span> + <span class="green-text">?</span> = 10</div>
     <div id="choiceFeedback" class="choice-feedback" aria-live="polite"></div>
-    <div class="choice-actions"><span id="choiceProgress" class="muted-note" aria-live="polite">0 feladat · 0 helyes</span></div>
-    <div class="muted-note">Válaszd ki pontosan a fenti piros és zöld korongok számát! A 0 is választható.</div>
+    <span id="choiceProgress" hidden aria-hidden="true"></span>
+    
   </div>
 </section>
 
@@ -71,4 +71,4 @@
 </div>
 
 
-<script type="module" src="../js/choose.js?v=1794676788"></script></body></html>
+<script type="module" src="../js/choose.js?v=20261114203631"></script></body></html>

@@ -1,4 +1,4 @@
-import { randomInt, formatSeconds } from "./utils.js?v=20261114170903";
+import { randomInt, formatSeconds } from "./utils.js?v=20261114203631";
 let selectedRed = null;
 let selectedGreen = null;
 let choiceChecked = false;
@@ -7,6 +7,7 @@ let choiceStartedAt = performance.now();
 let choiceHistory = [];
 let choiceNextTimer = null;
 const choiceModal = document.getElementById('choiceStatsModal');
+const matekSession = MatekShared.create({anchor:'.practice-head',modal:'#choiceStatsModal'});
 
 function renderChoiceDiscs() {
     const grid = document.getElementById('choiceDiscGrid');
@@ -21,7 +22,7 @@ function renderChoices() {
     for (const [color, parentId, selected] of [['red','redChoices',selectedRed], ['green','greenChoices',selectedGreen]]) {
         const parent = document.getElementById(parentId);
         parent.replaceChildren();
-        for (let number = 0; number <= 10; number++) {
+        for (let number = 1; number <= 9; number++) {
             const btn = document.createElement('button');
             btn.className = `number-choice ${color}-choice` + (number === selected ? ` selected-${color}` : '');
             btn.textContent = number;
@@ -42,7 +43,7 @@ function renderChoices() {
 function nextChoiceExercise() {
     if (choiceNextTimer !== null) { clearTimeout(choiceNextTimer); choiceNextTimer = null; }
     let next;
-    do { next = randomInt(0, 10); } while (next === targetChoiceRed);
+    do { next = randomInt(1, 9); } while (next === targetChoiceRed);
     targetChoiceRed = next;
     selectedRed = null;
     selectedGreen = null;
@@ -61,6 +62,7 @@ function submitChoice() {
     choiceChecked = true;
     const correctChoice = selectedRed === targetChoiceRed && selectedGreen === 10 - targetChoiceRed;
     const seconds = (performance.now() - choiceStartedAt) / 1000;
+    matekSession.record({correct: correctChoice, seconds});
     choiceHistory.push({number: choiceHistory.length + 1, red: targetChoiceRed, green: 10 - targetChoiceRed, selectedRed, selectedGreen, correct: correctChoice, seconds});
     const feedback = document.getElementById('choiceFeedback');
     feedback.textContent = correctChoice ? '✓ Jó!' : `✗ Rossz! A helyes válasz: ${targetChoiceRed} + ${10 - targetChoiceRed}`;
@@ -100,6 +102,7 @@ function closeChoiceStats() {
 }
 function restartChoicePractice() {
     choiceHistory = [];
+    matekSession.reset();
     updateChoiceProgress();
     choiceModal.classList.remove('show');
     nextChoiceExercise();
