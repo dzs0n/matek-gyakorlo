@@ -8,6 +8,28 @@
     <title>Tízes átlépés korongokkal – Matekgyakorló</title>
 
     <link rel="stylesheet" href="../style.css">
+    <style>
+        /* ten-crossing counter and calculation */
+        .ten-partial-calculation {
+            min-height: 1.5em;
+            margin: 4px 0 12px;
+            text-align: center;
+            font-size: clamp(20px, 5vw, 30px);
+            font-weight: 700;
+            line-height: 1.3;
+            font-variant-numeric: tabular-nums;
+        }
+        .ten-bank-count {
+            display: inline-flex;
+            align-items: center;
+            white-space: nowrap;
+            margin-left: 8px;
+            font-size: 20px;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+        }
+        #tenBank { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-start; gap: 6px; }
+    </style>
 </head>
 
 <body>
@@ -80,15 +102,15 @@
                     inputmode="numeric"
                     min="11"
                     max="18"
-                    placeholder="?"
+                    placeholder=""
                     aria-label="Az összeadás eredménye"
                     autocomplete="off"
                 >
             </div>
 
+            <div id="tenPartialCalculation" class="ten-partial-calculation" aria-live="polite"></div>
             <p class="muted-note">
-                Húzd a zöld korongokat az üres négyzetekbe,
-                vagy érintsd meg előbb a korongot, majd a helyét!
+                Koppints az üres négyzetekre, vagy húzd oda a zöld korongokat!
                 Először töltsd tele az alsó keretet.
             </p>
 

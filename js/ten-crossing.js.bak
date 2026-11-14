@@ -1,0 +1,691 @@
+
+import { randomInt, formatSeconds } from "./utils.js";
+
+// ==================================================
+// HTML-elemek
+// ==================================================
+
+const $ = (id) => document.getElementById(id);
+
+const modal = $("tenStatsModal");
+const upperFrame = $("tenUpper");
+const lowerFrame = $("tenLower");
+const bank = $("tenBank");
+const answerInput = $("tenAnswer");
+
+// ==================================================
+// Állapot
+// ==================================================
+
+let a = 8;
+let b = 5;
+
+let lowerSlots = Array(10).fill(null);
+let upperSlots = Array(10).fill(null);
+
+let placed = 0;
+let mistakes = 0;
+let selected = false;
+
+let history = [];
+let previous = "";
+
+let questionStarted = 0;
+let sessionStarted = performance.now();
+
+let pausedAt = null;
+let totalPaused = 0;
+let nextTimer = null;
+let questionFinished = false;
+
+// ==================================================
+// Időmérés
+// ==================================================
+
+function elapsedSessionSeconds() {
+    const now = pausedAt ?? performance.now();
+
+    return Math.max(
+        0,
+        (now - sessionStarted - totalPaused) / 1000
+    );
+}
+
+function elapsedQuestionSeconds() {
+    const now = pausedAt ?? performance.now();
+
+    return Math.max(
+        0,
+        (now - questionStarted) / 1000
+    );
+}
+
+function formatClock(seconds) {
+    const total = Math.floor(seconds);
+    const minutes = Math.floor(total / 60);
+    const remaining = total % 60;
+
+    return (
+        String(minutes).padStart(2, "0") +
+        ":" +
+        String(remaining).padStart(2, "0")
+    );
+}
+
+function updateSessionInfo() {
+    $("tenSessionTime").textContent =
+        formatClock(elapsedSessionSeconds());
+
+    $("tenSessionCount").textContent =
+        String(history.length);
+}
+
+setInterval(updateSessionInfo, 1000);
+
+// ==================================================
+// Új feladat
+// ==================================================
+
+function cancelNext() {
+    if (nextTimer !== null) {
+        clearTimeout(nextTimer);
+        nextTimer = null;
+    }
+}
+
+function resetCurrentQuestion() {
+    placed = 0;
+    mistakes = 0;
+    selected = false;
+    questionFinished = false;
+
+    lowerSlots = Array(10).fill(null);
+    upperSlots = Array(10).fill(null);
+
+    for (let i = 0; i < a; i++) {
+        lowerSlots[i] = "red";
+    }
+
+    questionStarted = performance.now();
+
+    answerInput.value = "";
+    answerInput.disabled = false;
+    answerInput.classList.remove("wrong-answer");
+
+    $("tenFeedback").textContent = "";
+    $("tenFeedback").className = "ten-feedback";
+
+    render();
+}
+
+function generate() {
+    cancelNext();
+
+    const level = $("tenLevel").value;
+
+    const min =
+        level === "easy" ? 8 :
+        level === "medium" ? 6 : 2;
+
+    let pair;
+
+    do {
+        a = randomInt(min, 9);
+        b = randomInt(11 - a, 9);
+        pair = `${a}+${b}`;
+    } while (pair === previous);
+
+    previous = pair;
+
+    resetCurrentQuestion();
+}
+
+// ==================================================
+// Korongok és keretek
+// ==================================================
+
+function lowerCount() {
+    return lowerSlots.filter(Boolean).length;
+}
+
+function available() {
+    return !questionFinished && placed < b;
+}
+
+function makeDisc(color) {
+    const disc = document.createElement("span");
+
+    disc.className = `ten-disc ten-${color}`;
+
+    return disc;
+}
+
+function renderFrame(element, slots, isUpper) {
+    element.replaceChildren();
+
+    slots.forEach((color, index) => {
+        const cell = document.createElement("button");
+
+        cell.type = "button";
+        cell.className = "ten-cell";
+
+        cell.dataset.frame = isUpper ? "upper" : "lower";
+        cell.dataset.index = String(index);
+
+        cell.setAttribute(
+            "aria-label",
+            `${isUpper ? "Felső" : "Alsó"} keret, ` +
+            `${index + 1}. hely: ` +
+            `${color ? "foglalt" : "üres"}`
+        );
+
+        if (color) {
+            cell.append(makeDisc(color));
+        } else if (available()) {
+            cell.addEventListener("click", () => {
+                place(isUpper, index);
+            });
+
+            cell.addEventListener("dragover", (event) => {
+                event.preventDefault();
+                cell.classList.add("ten-drop-target");
+            });
+
+            cell.addEventListener("dragleave", () => {
+                cell.classList.remove("ten-drop-target");
+            });
+
+            cell.addEventListener("drop", (event) => {
+                event.preventDefault();
+                cell.classList.remove("ten-drop-target");
+
+                if (event.dataTransfer.getData("text/plain") === "green-disc") {
+                    place(isUpper, index);
+                }
+            });
+        }
+
+        element.append(cell);
+    });
+}
+
+function renderBank() {
+    bank.replaceChildren();
+
+    const remaining = b - placed;
+
+    for (let i = 0; i < remaining; i++) {
+        const disc = document.createElement("button");
+
+        disc.type = "button";
+        disc.className = "ten-bank-disc";
+
+        disc.draggable = true;
+
+        disc.setAttribute(
+            "aria-label",
+            "Zöld korong, áthelyezésre vár"
+        );
+
+        disc.addEventListener("click", () => {
+            if (!available()) {
+                return;
+            }
+
+            selected = true;
+            renderBank();
+        });
+
+        disc.addEventListener("dragstart", (event) => {
+            if (!available()) {
+                event.preventDefault();
+                return;
+            }
+
+            selected = true;
+
+            event.dataTransfer.setData(
+                "text/plain",
+                "green-disc"
+            );
+
+            event.dataTransfer.effectAllowed = "move";
+        });
+
+        bank.append(disc);
+    }
+
+    const count = document.createElement("span");
+    count.className = "ten-bank-count";
+    count.textContent = `${remaining} maradt`;
+    count.setAttribute("aria-live", "polite");
+    bank.append(count);
+}
+
+function render() {
+    $("tenExpression").textContent = `${a} + ${b} =`;
+
+    if (questionFinished) {
+        answerInput.value = String(a + b);
+        answerInput.disabled = true;
+    } else {
+        answerInput.disabled = false;
+    }
+
+    // Reszszamitas: a korongokkal egyutt valtozik.
+    const lowerGreen = lowerSlots.filter(color => color === "green").length;
+    const upperGreen = upperSlots.filter(color => color === "green").length;
+    let calculation;
+    if (lowerGreen === 0 && upperGreen === 0) {
+        calculation = `${a}`;
+    } else if (lowerGreen < 10 - a) {
+        calculation = `${a} + ${lowerGreen} = ${a + lowerGreen}`;
+    } else if (upperGreen === 0) {
+        calculation = `${a} + ${lowerGreen} = 10`;
+    } else {
+        calculation = `${a} + ${lowerGreen} + ${upperGreen} = ${a + lowerGreen + upperGreen}`;
+    }
+    $("tenPartialCalculation").textContent = calculation;
+
+    renderFrame(upperFrame, upperSlots, true);
+    renderFrame(lowerFrame, lowerSlots, false);
+    renderBank();
+
+    $("tenProgress").textContent =
+        `${history.length} megoldott feladat · ` +
+        `${b - placed} korong maradt`;
+
+    updateSessionInfo();
+}
+
+// ==================================================
+// Korong elhelyezése
+// ==================================================
+
+function showError(message) {
+    mistakes++;
+
+    $("tenFeedback").textContent = message;
+    $("tenFeedback").className = "ten-feedback ten-error";
+}
+
+function place(isUpper, index) {
+    if (!available() || pausedAt !== null) {
+    return;
+    }
+
+    const slots = isUpper ? upperSlots : lowerSlots;
+
+    if (slots[index] !== null) {
+        return;
+    }
+
+    if (isUpper && lowerCount() < 10) {
+        showError("Először egészítsd ki az alsó keretet tízre!");
+        return;
+    }
+
+    slots[index] = "green";
+    placed++;
+    selected = false;
+
+    $("tenFeedback").textContent =
+        lowerCount() === 10 && placed < b
+            ? "Megvan a tíz! A többi korong mehet felülre."
+            : "";
+
+    $("tenFeedback").className = "ten-feedback";
+
+    render();
+
+    if (placed === b) {
+        finishQuestion("Korongokkal");
+    }
+}
+
+// ==================================================
+// Feladat befejezése
+// ==================================================
+
+function finishQuestion(method) {
+    if (questionFinished) {
+        return;
+    }
+
+    questionFinished = true;
+
+    const seconds = elapsedQuestionSeconds();
+
+    history.push({
+        a,
+        b,
+        result: a + b,
+        seconds,
+        mistakes,
+        independent: mistakes === 0,
+        method
+    });
+
+    answerInput.value = String(a + b);
+    answerInput.disabled = true;
+    answerInput.classList.remove("wrong-answer");
+
+    $("tenFeedback").textContent =
+        `Ügyes! ${a} + ${10 - a} = 10, ` +
+        `majd 10 + ${a + b - 10} = ${a + b}`;
+
+    $("tenFeedback").className = "ten-feedback ten-success";
+
+    render();
+
+    $("tenProgress").textContent =
+        `${history.length} megoldott feladat`;
+
+    nextTimer = setTimeout(() => {
+        nextTimer = null;
+        generate();
+    }, 1800);
+}
+
+// ==================================================
+// Megoldás az eredmény beírásával
+// ==================================================
+
+function submitAnswer() {
+    if (questionFinished || pausedAt !== null) {
+        return;
+    }
+
+    const rawValue = answerInput.value.trim();
+
+    if (rawValue === "") {
+        return;
+    }
+
+    const answer = Number(rawValue);
+
+    if (answer !== a + b) {
+        showError("Ez most nem jó. Próbáld újra!");
+
+        answerInput.classList.add("wrong-answer");
+        answerInput.select();
+        return;
+    }
+
+    // Helyes válasz: a hiányzó korongok
+    // automatikusan megjelennek.
+
+    for (let i = 0; i < 10; i++) {
+        if (lowerSlots[i] === null) {
+            lowerSlots[i] = "green";
+        }
+    }
+
+    const upperCount = a + b - 10;
+
+    let existingUpper = upperSlots.filter(Boolean).length;
+
+    for (let i = 0; i < 10 && existingUpper < upperCount; i++) {
+        if (upperSlots[i] === null) {
+            upperSlots[i] = "green";
+            existingUpper++;
+        }
+    }
+
+    placed = b;
+    selected = false;
+
+    answerInput.classList.remove("wrong-answer");
+
+    finishQuestion("Fejben");
+}
+
+answerInput.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+        event.preventDefault();
+        submitAnswer();
+    }
+});
+
+answerInput.addEventListener("input", () => {
+    answerInput.classList.remove("wrong-answer");
+});
+
+// ==================================================
+// Statisztika
+// ==================================================
+
+function median() {
+    if (history.length === 0) {
+        return null;
+    }
+
+    const times = history
+        .map((item) => item.seconds)
+        .sort((x, y) => x - y);
+
+    const middle = Math.floor(times.length / 2);
+
+    return times.length % 2
+        ? times[middle]
+        : (times[middle - 1] + times[middle]) / 2;
+}
+
+function stats() {
+    const total = history.length;
+
+    const independent = history.filter(
+        (item) => item.independent
+    ).length;
+
+    const percent = total
+        ? Math.round(independent / total * 100)
+        : 0;
+
+    $("tenTotal").textContent = String(total);
+    $("tenCorrect").textContent = String(independent);
+    $("tenPercent").textContent = `${percent}%`;
+
+    const medianTime = median();
+
+    $("tenMedian").textContent =
+        medianTime === null
+            ? "–"
+            : formatSeconds(medianTime);
+
+    const sessionTime = formatClock(elapsedSessionSeconds());
+
+    if (total === 0) {
+        $("tenStatsTable").innerHTML = `
+            <p>Teljes gyakorlási idő: <strong>${sessionTime}</strong></p>
+            <div class="empty-state">Még nincs megoldott feladat.</div>
+        `;
+        return;
+    }
+
+    const rows = history.map((item, index) => `
+        <tr>
+            <td>${index + 1}.</td>
+            <td>${item.a} + ${item.b} = ${item.result}</td>
+            <td>${item.method}</td>
+            <td>${formatSeconds(item.seconds)}</td>
+            <td>${item.mistakes}</td>
+            <td>${item.independent ? "Önálló" : "Hibával"}</td>
+        </tr>
+    `).join("");
+
+    $("tenStatsTable").innerHTML = `
+        <p>
+            Teljes gyakorlási idő:
+            <strong>${sessionTime}</strong>
+        </p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Feladat</th>
+                    <th>Megoldás</th>
+                    <th>Idő</th>
+                    <th>Hibák</th>
+                    <th>Eredmény</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${rows}
+            </tbody>
+        </table>
+    `;
+}
+
+// ==================================================
+// Statisztikai ablak
+// ==================================================
+
+function openStats() {
+    cancelNext();
+
+    if (pausedAt === null) {
+        pausedAt = performance.now();
+    }
+
+    updateSessionInfo();
+    stats();
+
+    modal.classList.add("show");
+}
+
+function closeStats() {
+    modal.classList.remove("show");
+
+    if (pausedAt !== null) {
+        const pauseDuration = performance.now() - pausedAt;
+
+        totalPaused += pauseDuration;
+        questionStarted += pauseDuration;
+
+        pausedAt = null;
+    }
+
+    if (questionFinished) {
+        generate();
+    }
+
+    updateSessionInfo();
+}
+
+// ==================================================
+// Gombok
+// ==================================================
+
+$("tenStatsBtn").addEventListener("click", openStats);
+$("tenCloseStats").addEventListener("click", closeStats);
+$("tenContinue").addEventListener("click", closeStats);
+
+modal.addEventListener("click", (event) => {
+    if (event.target === modal) {
+        closeStats();
+    }
+});
+
+// Aktuális feladat újrakezdése.
+$("tenReset").addEventListener("click", () => {
+    cancelNext();
+    resetCurrentQuestion();
+});
+
+// Nehézségi szint váltása.
+$("tenLevel").addEventListener("change", () => {
+    generate();
+});
+
+// Új gyakorlás.
+$("tenRestart").addEventListener("click", () => {
+    cancelNext();
+
+    history = [];
+    previous = "";
+
+    sessionStarted = performance.now();
+    totalPaused = 0;
+    pausedAt = null;
+
+    modal.classList.remove("show");
+
+    generate();
+});
+
+// Nyomtatás / PDF.
+$("tenPrint").addEventListener("click", () => {
+    window.print();
+});
+
+// ==================================================
+// TXT-statisztika
+// ==================================================
+
+$("tenDownload").addEventListener("click", () => {
+    const total = history.length;
+
+    const independent = history.filter(
+        (item) => item.independent
+    ).length;
+
+    const percent = total
+        ? Math.round(independent / total * 100)
+        : 0;
+
+    const medianTime = median();
+
+    const lines = [
+        "TÍZES ÁTLÉPÉS – EREDMÉNYEK",
+        "",
+        `Teljes gyakorlási idő: ${formatClock(elapsedSessionSeconds())}`,
+        `Megoldott feladatok: ${total}`,
+        `Önálló megoldások: ${independent}`,
+        `Önálló arány: ${percent}%`,
+        `Medián feladatidő: ${
+            medianTime === null ? "–" : formatSeconds(medianTime)
+        }`,
+        "",
+        "RÉSZLETES EREDMÉNYEK",
+        ""
+    ];
+
+    history.forEach((item, index) => {
+        lines.push(
+            `${index + 1}. ${item.a} + ${item.b} = ${item.result}` +
+            ` | módszer: ${item.method}` +
+            ` | idő: ${formatSeconds(item.seconds)}` +
+            ` | hibák: ${item.mistakes}` +
+            ` | ${item.independent ? "ÖNÁLLÓ" : "HIBÁVAL"}`
+        );
+    });
+
+    const blob = new Blob(
+        ["\uFEFF" + lines.join("\r\n")],
+        { type: "text/plain;charset=utf-8" }
+    );
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download =
+        `tizes_atlepes_${new Date().toISOString().slice(0, 10)}.txt`;
+
+    document.body.append(link);
+    link.click();
+    link.remove();
+
+    setTimeout(() => {
+        URL.revokeObjectURL(url);
+    }, 1000);
+});
+
+// ==================================================
+// Indítás
+// ==================================================
+
+generate();
+updateSessionInfo();

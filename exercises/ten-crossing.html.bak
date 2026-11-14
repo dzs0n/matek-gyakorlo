@@ -1,0 +1,235 @@
+
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Tízes átlépés korongokkal – Matekgyakorló</title>
+
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        /* ten-crossing counter and calculation */
+        .ten-partial-calculation {
+            min-height: 1.5em;
+            margin: 4px 0 12px;
+            text-align: center;
+            font-size: clamp(20px, 5vw, 30px);
+            font-weight: 700;
+            line-height: 1.3;
+            font-variant-numeric: tabular-nums;
+        }
+        .ten-bank-count {
+            display: inline-flex;
+            align-items: center;
+            white-space: nowrap;
+            margin-left: 8px;
+            font-size: 20px;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+        }
+        #tenBank { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-start; gap: 6px; }
+    </style>
+</head>
+
+<body>
+    <header class="site-header">
+        <div class="exercise-meta">
+            Matematika · 1–2. évfolyam · Összeadás · Tízes átlépés
+        </div>
+    </header>
+
+    <section class="practice-view" style="display: block;">
+        <a
+            class="back-button"
+            href="../index.html"
+            style="display: inline-block; text-decoration: none;"
+        >
+            ← Főmenü
+        </a>
+
+        <div class="practice-panel ten-panel">
+
+            <!-- Fejléc -->
+            <div class="practice-head">
+                <h2>Tízes átlépés korongokkal</h2>
+
+                <button id="tenStatsBtn" class="secondary">
+                    Vége / Statisztika
+                </button>
+            </div>
+
+            <!-- Nehézségi szint -->
+            <div class="ten-settings">
+                <label for="tenLevel">Nehézség</label>
+
+                <select id="tenLevel">
+                    <option value="easy">
+                        Könnyű (8–9-ről indul)
+                    </option>
+
+                    <option value="medium" selected>
+                        Közepes (6–9-ről indul)
+                    </option>
+
+                    <option value="all">
+                        Vegyes (2–9-ről indul)
+                    </option>
+                </select>
+            </div>
+
+            <!-- Gyakorlási idő és megoldott feladatok -->
+            <div class="ten-session-info">
+                <div class="ten-session-item">
+                    <span>Gyakorlási idő</span>
+                    <strong id="tenSessionTime">00:00</strong>
+                </div>
+
+                <div class="ten-session-item">
+                    <span>Megoldott feladatok</span>
+                    <strong id="tenSessionCount">0</strong>
+                </div>
+            </div>
+
+            <!-- Aktuális feladat -->
+            <div class="ten-equation" id="tenEquation">
+                <span id="tenExpression"></span>
+
+                <input
+                    type="number"
+                    id="tenAnswer"
+                    class="ten-answer"
+                    inputmode="numeric"
+                    min="11"
+                    max="18"
+                    placeholder="?"
+                    aria-label="Az összeadás eredménye"
+                    autocomplete="off"
+                >
+            </div>
+
+            <div id="tenPartialCalculation" class="ten-partial-calculation" aria-live="polite"></div>
+            <p class="muted-note">
+                Koppints az üres négyzetekre, vagy húzd oda a zöld korongokat!
+                Először töltsd tele az alsó keretet.
+            </p>
+
+            <!-- Felső tízes keret -->
+            <div
+                class="ten-frame"
+                id="tenUpper"
+                aria-label="Felső tízes keret"
+            ></div>
+
+            <!-- Alsó tízes keret -->
+            <div
+                class="ten-frame"
+                id="tenLower"
+                aria-label="Alsó tízes keret"
+            ></div>
+
+            <!-- Áthelyezhető zöld korongok -->
+            <div class="ten-frame-label">
+                Áthelyezendő korongok
+            </div>
+
+            <div
+                class="ten-bank"
+                id="tenBank"
+                aria-label="Áthelyezendő zöld korongok"
+            ></div>
+
+            <!-- Visszajelzés -->
+            <div
+                class="ten-feedback"
+                id="tenFeedback"
+                aria-live="polite"
+            ></div>
+
+            <!-- Feladat vezérlése -->
+            <div class="ten-footer">
+                <span id="tenProgress" class="muted-note">
+                    0 feladat
+                </span>
+
+                <button class="secondary" id="tenReset">
+                    Feladat újrakezdése
+                </button>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Statisztikai ablak -->
+    <div
+        id="tenStatsModal"
+        class="modal-backdrop"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Tízes átlépés eredménye"
+    >
+        <div class="modal">
+
+            <div class="modal-header">
+                <h2>Tízes átlépés – eredmények</h2>
+
+                <button id="tenCloseStats" class="secondary">
+                    Bezárás
+                </button>
+            </div>
+
+            <!-- Összesített eredmények -->
+            <div class="summary-grid">
+                <div class="summary-box">
+                    <strong id="tenTotal">0</strong>
+                    feladat
+                </div>
+
+                <div class="summary-box">
+                    <strong id="tenCorrect">0</strong>
+                    segítség nélkül
+                </div>
+
+                <div class="summary-box">
+                    <strong id="tenPercent">0%</strong>
+                    önálló megoldás
+                </div>
+
+                <div class="summary-box">
+                    <strong id="tenMedian">–</strong>
+                    medián idő
+                </div>
+            </div>
+
+            <!-- Részletes statisztika -->
+            <div id="tenStatsTable"></div>
+
+            <!-- Statisztika vezérlése -->
+            <div class="modal-actions">
+                <button id="tenPrint" class="secondary">
+                    Nyomtatás / PDF
+                </button>
+
+                <button id="tenDownload" class="secondary">
+                    TXT letöltés
+                </button>
+
+                <button id="tenContinue" class="secondary">
+                    Folytatás
+                </button>
+
+                <button id="tenRestart">
+                    Új gyakorlás
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- JavaScript modul -->
+    <script
+        type="module"
+        src="../js/ten-crossing.js"
+    ></script>
+</body>
+</html>

@@ -218,9 +218,7 @@ function renderBank() {
         const disc = document.createElement("button");
 
         disc.type = "button";
-        disc.className =
-            "ten-bank-disc" +
-            (selected ? " selected" : "");
+        disc.className = "ten-bank-disc";
 
         disc.draggable = true;
 
@@ -256,6 +254,12 @@ function renderBank() {
 
         bank.append(disc);
     }
+
+    const count = document.createElement("span");
+    count.className = "ten-bank-count";
+    count.textContent = `${remaining} maradt`;
+    count.setAttribute("aria-live", "polite");
+    bank.append(count);
 }
 
 function render() {
@@ -267,6 +271,19 @@ function render() {
     } else {
         answerInput.disabled = false;
     }
+
+    // A reszszamitas csak a felbontast mutatja, a megoldast nem.
+    const lowerGreen = lowerSlots.filter(color => color === "green").length;
+    const upperGreen = upperSlots.filter(color => color === "green").length;
+    let calculation = "";
+    if (lowerGreen > 0 && lowerGreen < 10 - a) {
+        calculation = `${a} + ${lowerGreen}`;
+    } else if (lowerGreen === 10 - a) {
+        calculation = upperGreen > 0
+            ? `${a} + ${lowerGreen} + ${upperGreen} =`
+            : `${a} + ${lowerGreen} =`;
+    }
+    $("tenPartialCalculation").textContent = calculation;
 
     renderFrame(upperFrame, upperSlots, true);
     renderFrame(lowerFrame, lowerSlots, false);
@@ -291,8 +308,8 @@ function showError(message) {
 }
 
 function place(isUpper, index) {
-    if (!available() || pausedAt !== null || !selected) {
-        return;
+    if (!available() || pausedAt !== null) {
+    return;
     }
 
     const slots = isUpper ? upperSlots : lowerSlots;
@@ -319,9 +336,7 @@ function place(isUpper, index) {
 
     render();
 
-    if (placed === b) {
-        finishQuestion("Korongokkal");
-    }
+    // A korongok kirakasa csak segitseg. A valaszt be kell irni.
 }
 
 // ==================================================
@@ -413,12 +428,13 @@ function submitAnswer() {
         }
     }
 
+    const method = placed > 0 ? "Korongokkal" : "Fejben";
     placed = b;
     selected = false;
 
     answerInput.classList.remove("wrong-answer");
 
-    finishQuestion("Fejben");
+    finishQuestion(method);
 }
 
 answerInput.addEventListener("keydown", (event) => {
