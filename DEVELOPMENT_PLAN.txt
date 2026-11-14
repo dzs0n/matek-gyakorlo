@@ -1,0 +1,111 @@
+MATEK-GYAKORLO - FEJLESZTESI TERV ES PROJEKTKONTEXTUS
+Frissitve: 2026-11-14
+Repo: https://github.com/dzs0n/matek-gyakorlo
+Web: https://dzs0n.github.io/matek-gyakorlo/
+
+1. CEL
+Ingyenesen elerheto, jatekos, gyerekbarat gyakorloplatform, kezdetben
+alsos matematika feladatokkal. A projekt eredetileg egy masodikos
+kisgyerek szamara indult. Kesobb mas evfolyamokra es tantargyakra is
+bovitheto. Fontos a szemelyre szabott gyakorlás es a fejlodes merese.
+
+2. JELENLEGI TECHNIKAI IRANY - EZT TARTSUK MEG
+- Sima HTML + CSS + JavaScript (ES modules); NEM React, Vite vagy TypeScript.
+- Statikus weboldal, GitHub Pages hosting.
+- Modularis szerkezet: menu, kulon fajlban az egyes feladattipusok,
+  kozos segedfuggvenyek es statisztika.
+- Elsodlegesen bongeszoben mukodik Windows, macOS, Linux, Android,
+  iOS/iPadOS alatt; telefonon erintessel is jol hasznalhato legyen.
+- Fejlesztes Windows alatt; iPhone-on is tesztelheto, akar helyi
+  Python HTTP-szerverrel azonos Wi-Fi halozaton.
+- A feladatok lehetoleg internet nelkul is fussanak. Kesobb PWA
+  (manifest, ikonok, service worker) tamogatas johet.
+- Kesobb ugyanebbol a kodbazisbol Capacitorral valodi iOS/Android
+  alkalmazas keszulhet, App Store/Google Play publikacioval.
+- A store-jovahagyas nem garantalt; kulonosen a minimalis funkcionalitas,
+  gyermekek adatvedelme es a kodfrissitesi szabalyok fontosak.
+
+3. JELENLEGI / KORABBAN MEGVALOSITOTT FELADATOK
+Az eredeti egyfajlos index.html harom feladatot tartalmazott:
+A) Korongok felismerese: 10 piros/zold korong, szobeli felismeres,
+   megoldas megmutatasa, kovetkezo feladat; statisztika nelkul.
+B) Rakd ossze a tizet!: kirajzolt piros/zold korongok, ket 0-10
+   szamvalaszto; mindket valasz utan automatikus ellenorzes,
+   helyes/hibas visszajelzes, kb. 1,6 mp mulva uj feladat;
+   statisztika, median valaszido, tablazat, TXT export, nyomtatas/PDF.
+C) Mennyi hianyzik?: a + ? = b, nehezsegi szintek (10, 20easy, 20),
+   automatikus tovabblepes kb. 1 mp utan; statisztika,
+   median valaszido, TXT export, nyomtatas/PDF.
+FONTOS: a repo aktualis fajljai az iranyadok. Az uj beszelgetesben
+ellenorizni kell, mi van tenylegesen megvalositva es modularizalva;
+a fenti lista az ismert korabbi allapot, nem ellenorzott release-leiras.
+
+4. TERVEZETT FELHASZNALOI SZEREPEK
+- Gyerek: jatekos gyakorlás, kiosztott feladatok, egyszeru visszajelzes.
+  Lehetoleg ne kelljen sajat e-mail-cim vagy bonyolult bejelentkezes.
+- Szulo: gyerekprofil letrehozasa/kezelese, fejlodes es eredmenyek
+  megtekintese, gyakorlás kiosztasa, tanari kapcsolatok engedelyezese.
+- Tanar / korrepetitor: tanulok es csoportok kezelese, gyerekenkent
+  feladattipus, nehezseg, darabszam es esetleg hatarido kiosztasa;
+  eredmenyek kovetese, celzott tovabbi gyakorlás javaslata.
+- Egy gyerekhez tobb szulo/gondviselo es tobb tanar kapcsolodhasson.
+- A tanar csak megfelelo felhatalmazassal ferjen hozza a gyerek
+  adataihoz; a hozzaferes legyen visszavonhato.
+
+5. EREDMENYEK ES STATISZTIKAK
+- Feladatonkent: feladattipus-azonosito, nehezseg, megoldas,
+  helyesseg, valaszido, idopont, gyerekprofil, esetleges kiosztas.
+- Osszesitve: megoldott feladatok, helyes arany, median valaszido,
+  idobeli fejlodes, nehezsegek es gyakori hibak.
+- A szulo es a jogosult tanar azonos, naprakész eredmenyeket lasson.
+- A gyerek felulete maradjon egyszeru es motiváló.
+- Az elso verzioban helyi statisztika es export elegendo;
+  felhos szinkronizacio kesobb.
+
+6. MODULARIS FELADATRENDSZER - MAR MOST ERDEMES TERVEZNI
+Minden feladattipus kapjon stabil, egyedi azonositot es metadatokat:
+pl. id: math.addition.make-ten; tantargy; evfolyam(ok); temakor;
+nehezsegi szintek. A feladatmodul valassza szet a feladatgeneralast,
+a megjelenitest, a megoldas ellenorzeset es az eredmenyrogzitest.
+Legyen kesobb lehetseges az ilyen kiosztas:
+  gyerek X -> math.addition.make-ten -> 20 feladat -> nehezseg 1
+A kozos eredmenyformatumot minel elobb rogzitjuk, de a backend
+megvalositasat nem kezdjuk el idö elott.
+
+7. TAVOLABBI ARCHITEKTURA
+Webes frontend (ugyanaz a feladatmotor) + backend API + adatbazis.
+A backend kezeli a fiokokat, szerepkoroket, jogosultsagokat,
+tanar-gyerek kapcsolatokat, kiosztasokat es szinkronizalt eredmenyeket.
+A feladatok generalasa es ellenorzese lehetoseg szerint a kliensen
+fut. A konkret backend technologia meg nincs kivalasztva.
+A telepitett mobilappba csomagolt JS-frissites es a szerverrol erkezo
+feladattartalom kulon tervezendo az alkalmazasboltok szabalyai miatt.
+
+8. ADATVEDELEM ES BIZTONSAG
+Kiskoruak adatairol van szo: adattakarekossag, megfelelo
+szuloi/gondviseloi felhatalmazas, szabalyozott tanari hozzaferes,
+torlesi es visszavonasi lehetoseg, biztonsagos azonositas.
+Gyermekeknek szolo alkalmazasokra kulon App Store/Google Play
+szabalyok vonatkoznak. Reszletes jogi/adatvedelmi tervezes kell
+az eles fiokos rendszer elott.
+
+9. FEJLESZTESI U TEMTERV
+1. MOST: egyszeru modularis HTML/CSS/JS, mukodo feladatok,
+   mobilbarat felulet, helyi statisztika, GitHub Pages.
+2. KOVETKEZO: uj feladattipusok, egységes feladat- es eredmenyformatum,
+   helyi gyerekprofilok, feladatsorok, opcionális PWA/offline mod.
+3. KESOBB: backend, regisztracio, szulo/tanar fiokok,
+   jogosultsagok, feladatkiosztas, megosztott statisztika.
+4. MAJD: iOS/Android app Capacitorral, publikacio, tovabbi
+   tantargyak/evfolyamok, nagyobb felhasznaloszam kiszolgalasa.
+
+10. IRANYELVEK A KOVETKEZO CHATGPT-BESZELGETESEKHEZ
+- A felhasznalo most gyorsan akar uj, hasznos gyakorlófeladatokat
+  kesziteni; ne vezessunk be indokolatlan keretrendszert vagy backendet.
+- Az eredeti feladatok megjeleneset, mukodeset es statisztikajat
+  valtoztatas nelkul orizzuk meg, hacsak nincs kulon keres.
+- Minden uj feladat onallo modul legyen; minimalis kozponti modositas.
+- Egyszeru, attekintheto kod, kulso fuggosegek nelkul, ahol lehet.
+- Ne allitsuk, hogy valami mar kesz, amig a repo fajljaiban nem lattuk.
+- Uj session elejen olvassuk el ezt a fajlt, a README.md-t es a
+  tenyleges forraskodot; a konkret feladatot ezek alapjan folytassuk.
