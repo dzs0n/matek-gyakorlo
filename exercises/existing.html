@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="hu"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Mennyi hiányzik? – Matekgyakorló</title><link rel="stylesheet" href="../style.css"></head>
+<body><header class="site-header"><div class="exercise-meta">Matematika · 1–2. évfolyam · Összeadás · Hiányzó tag · 20-as számkör</div></header>
+<div class="app" id="existingView">
+    <a class="back-button" href="../index.html" style="display:inline-block;text-decoration:none">← Főmenü</a>
+    <div class="toolbar">
+        <label>
+            Nehézség
+            <select id="level">
+                <option value="10">10-en belül</option>
+                <option value="20easy">20-ig, könnyebb</option>
+                <option value="20" selected>20-ig, minden</option>
+            </select>
+        </label>
+
+        <button id="reset" class="secondary">Újrakezdés</button>
+        <button id="finish" class="finish">Vége / Statisztika</button>
+    </div>
+
+    <div class="card">
+        <div class="question-label">Mennyi hiányzik?</div>
+
+        <div class="equation">
+            <span id="start">7</span>
+            <span>+</span>
+            <input id="answer" type="number" min="0" max="20">
+            <span>=</span>
+            <span id="target">12</span>
+        </div>
+
+        <div style="margin-top: 30px;">
+            <button id="check">Ellenőrzés</button>
+        </div>
+
+        <div id="feedback"></div>
+    </div>
+
+    <div class="stats">
+        <div class="stat">
+            <div class="stat-number" id="correct">0</div>
+            <div class="stat-label">jó válasz</div>
+        </div>
+        <div class="stat">
+            <div class="stat-number" id="total">0</div>
+            <div class="stat-label">feladat</div>
+        </div>
+        <div class="stat">
+            <div class="stat-number" id="streak">0</div>
+            <div class="stat-label">sorozat</div>
+        </div>
+    </div>
+
+    <div class="tip">
+        Tipp: ha már ismeri a számokat, próbálja fejben kitalálni, ne mindig ujjal számolja végig.
+    </div>
+</div>
+
+<div id="statsModal" class="modal-backdrop">
+    <div class="modal">
+        <div class="modal-header">
+            <h2>Gyakorlás eredménye</h2>
+            <button id="closeStats" class="secondary">Bezárás</button>
+        </div>
+
+        <div class="summary-grid">
+            <div class="summary-box"><strong id="sumTotal">0</strong>feladat</div>
+            <div class="summary-box"><strong id="sumCorrect">0</strong>helyes</div>
+            <div class="summary-box"><strong id="sumPercent">0%</strong>eredmény</div>
+            <div class="summary-box"><strong id="sumAvg">–</strong>medián válaszidő</div>
+        </div>
+
+        <div id="resultTableWrap"></div>
+
+        <div class="modal-actions">
+            <button id="printStats" class="secondary">Nyomtatás / PDF</button>
+            <button id="downloadTxt" class="secondary">TXT letöltés</button>
+            <button id="continueBtn" class="secondary">Folytatás</button>
+            <button id="restartFromStats">Új gyakorlás</button>
+        </div>
+    </div>
+</div>
+
+
+<script type="module" src="../js/existing.js"></script></body></html>

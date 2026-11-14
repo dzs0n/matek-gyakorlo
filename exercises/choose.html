@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="hu"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Rakd össze a tízet! – Matekgyakorló</title><link rel="stylesheet" href="../style.css"></head>
+<body><header class="site-header"><div class="exercise-meta">Matematika · 1–2. évfolyam · Számfogalom · A tíz bontása</div></header>
+<section id="chooseView" class="practice-view" style="display:block" class="practice-view">
+  <a class="back-button" href="../index.html" style="display:inline-block;text-decoration:none">← Főmenü</a>
+  <div class="practice-panel">
+    <div class="practice-head"><h2>Rakd össze a tízet!</h2><button id="choiceStatsBtn" class="secondary">Vége / Statisztika</button></div>
+    <div id="choiceDiscGrid" class="disc-grid" aria-label="A kirakandó tíz korong"></div>
+    <div class="muted-note">Nézd meg a korongokat! Hány piros és hány zöld van?</div>
+    <div class="choice-layout">
+      <div class="choice-column"><h3 class="red-text">🔴 Piros</h3><div id="redChoices" class="number-choices"></div></div>
+      <div class="choice-column"><h3 class="green-text">🟢 Zöld</h3><div id="greenChoices" class="number-choices"></div></div>
+    </div>
+    <div id="choiceResult" class="choice-result"><span class="red-text">?</span> + <span class="green-text">?</span> = 10</div>
+    <div id="choiceFeedback" class="choice-feedback" aria-live="polite"></div>
+    <div class="choice-actions"><span id="choiceProgress" class="muted-note" aria-live="polite">0 feladat · 0 helyes</span></div>
+    <div class="muted-note">Válaszd ki pontosan a fenti piros és zöld korongok számát! A 0 is választható.</div>
+  </div>
+</section>
+
+<div id="choiceStatsModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Korongos gyakorlás eredménye">
+  <div class="modal">
+    <div class="modal-header"><h2>Korongos gyakorlás eredménye</h2><button id="closeChoiceStats" class="secondary">Bezárás</button></div>
+    <div class="summary-grid">
+      <div class="summary-box"><strong id="choiceSumTotal">0</strong>feladat</div>
+      <div class="summary-box"><strong id="choiceSumCorrect">0</strong>helyes</div>
+      <div class="summary-box"><strong id="choiceSumPercent">0%</strong>eredmény</div>
+      <div class="summary-box"><strong id="choiceSumMedian">–</strong>medián válaszidő</div>
+    </div>
+    <div id="choiceStatsTable"></div>
+    <div class="modal-actions">
+      <button id="printChoiceStats" class="secondary">Nyomtatás / PDF</button>
+      <button id="downloadChoiceStats" class="secondary">TXT letöltés</button>
+      <button id="continueChoiceStats" class="secondary">Folytatás</button>
+      <button id="restartChoiceStats">Új gyakorlás</button>
+    </div>
+  </div>
+</div>
+
+
+<script type="module" src="../js/choose.js"></script></body></html>
